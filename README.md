@@ -1,0 +1,2 @@
+# SeaBattleConsole
+Console Sea battle

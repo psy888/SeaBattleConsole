@@ -34,6 +34,11 @@ public class Game {
     //constructor
     public Game() {
         //todo fill game fields
+        printField();
+        fillGameField(userField);
+        printField();
+        fillGameField(compField);
+        printField();
 
 
     }
@@ -42,6 +47,16 @@ public class Game {
      * print game fields to console
      */
     public void printField() {
+        for (int i = 0; i < FIELD_SIZE; i++) {
+            for (int j = 0; j < FIELD_SIZE; j++) {
+                System.out.print(userField[i][j] + " ");
+            }
+            System.out.print("\t\t");
+            for (int j = 0; j < FIELD_SIZE; j++) {
+                System.out.print(compField[i][j] + " ");
+            }
+            System.out.println();
+        }
     }
 
     /**
@@ -80,17 +95,28 @@ public class Game {
                         ((j==0)?"начала ":"")+
                         (shipLength-i+1) +
                         " палубного корабля");*/
-                //координаты начала
-                int x = (int) (Math.random() * (10 - 1) + 1);
-                int y = (int) (Math.random() * (10 - 1) + 1);
+                //координаты начала нового корабля
+                int column;
+                int row;
+                do {
+                    row = (int) (Math.random() * (10 - 1) + 1);
+                    column = (int) (Math.random() * (10 - 1) + 1);
+                }while (isItClear(column,row,gameField));
                 //длинна текущего корабля
                 int curShipLength = shipLength - (shipLength - i);
-                //Палубы отдельного корабля
-                for (int k = 0; k < curShipLength; k++) {
-                    (gameField[y][x] = curShipLength;
-                    //todo определить следущие координаты
-                    int[] nextMove = findNextCoordinates(x, y, gameField);
 
+                //Палубы отдельного корабля
+                gameField[row][column] = curShipLength; //начало корабля
+                int[] prevMove = new int[]{column,row};
+                for (int k = 0; k < curShipLength-1; k++) {
+                    //todo определить следущие координаты
+                    int[] nextMove = findNextCoordinates(column, row, gameField);
+                    if(nextMove==null){
+                        nextMove = findNextCoordinates(prevMove[1],prevMove[0],gameField);
+                    }
+                    prevMove = nextMove;
+
+                    gameField[nextMove[1]][nextMove[0]] = curShipLength; //row column
                 }
 
             }
@@ -101,7 +127,7 @@ public class Game {
     /**
      * find next coordinates
      */
-    int[] findNextCoordinates(int curX, int curY, int[][] gameField) {
+    int[] findNextCoordinates(int curColumn, int curRow, int[][] gameField) {
 
         /*
             Варианты хода
@@ -122,78 +148,32 @@ public class Game {
 
          */
 
-        int[] resultUp;  //4 варианта по 2 координаты
-        int[] resultRight; //4 варианта по 2 координаты
-        int[] resultDown;//4 варианта по 2 координаты
-        int[] resultLeft; //4 варианта по 2 координаты
         int[][] result = new int[4][2];
         int chanceCnt = 0;
 
-        int curShipLength = gameField[curX][curY];
+        int curShipLength = gameField[curColumn][curRow];
 
         //--------------------------------------------------------------------------
-        //up - 0
-        try {
-            if (gameField[curX][curY - 1] == 0) {
-                if (
-                        gameField[curX - 1][curY - 1] == 0 &&
-                                gameField[curX - 1][curY - 2] == 0 &&
-                                gameField[curX][curY - 2] == 0 &&
-                                gameField[curX + 1][curY - 2] == 0 &&
-                                gameField[curX + 1][curY - 1] == 0
-                ) {
-                    result[chanceCnt++] = new int[]{curX, curY - 1};
-                }
-            }
-        } catch (IndexOutOfBoundsException ex) {/*ignore*/}
-        //right - 1
-        try {
-            if (gameField[curX + 1][curY] == 0) {
-                if (
-                        gameField[curX + 1][curY - 1] == 0 &&
-                                gameField[curX + 2][curY - 1] == 0 &&
-                                gameField[curX + 2][curY] == 0 &&
-                                gameField[curX + 1][curY + 1] == 0 &&
-                                gameField[curX + 2][curY + 1] == 0
-                ) {
-                    result[chanceCnt++] = new int[]{curX + 1, curY};
+        if (isUpClear(curColumn, curRow, gameField)) {
+            result[chanceCnt] = new int[]{curColumn, curRow - 1};
+            chanceCnt++;
+        }
+        if (isRightClear(curColumn, curRow, gameField)) {
+            result[chanceCnt] = new int[]{curColumn + 1, curRow};
+            chanceCnt++;
+        }
+        if (isDownClear(curColumn, curRow, gameField)) {
+            result[chanceCnt] = new int[]{curColumn, curRow + 1};
+            chanceCnt++;
+        }
+        if (isLeftClear(curColumn, curRow, gameField)) {
+            result[chanceCnt] = new int[]{curColumn - 1, curRow};
+            chanceCnt++;
+        }
 
-                }
-            }
-        } catch (IndexOutOfBoundsException ex) {/*ignore*/}
-
-        //down - 2
-        try {
-            if (gameField[curX][curY + 1] == 0) {
-                if (
-                        gameField[curX + 1][curY + 1] == 0 &&
-                                gameField[curX + 1][curY + 2] == 0 &&
-                                gameField[curX][curY + 2] == 0 &&
-                                gameField[curX - 1][curY + 2] == 0 &&
-                                gameField[curX - 1][curY + 1] == 0
-                ) {
-                    result[chanceCnt++] = new int[]{curX, curY + 1};
-
-                }
-            }
-        } catch (IndexOutOfBoundsException ex) {/*ignore*/}
-        //left - 3
-        try {
-            if (gameField[curX - 1][curY] == 0) {
-                if (
-                        gameField[curX - 1][curY + 1] == 0 &&
-                                gameField[curX - 2][curY + 1] == 0 &&
-                                gameField[curX - 2][curY] == 0 &&
-                                gameField[curX - 2][curY - 1] == 0 &&
-                                gameField[curX - 1][curY - 1] == 0
-                ) {
-                    result[chanceCnt++] = new int[]{curX - 1, curY};
-                }
-            }
-        } catch (IndexOutOfBoundsException ex) {/*ignore*/}
 
         if (chanceCnt > 0) {
-            int select = (int) (Math.random() * chanceCnt + 1); //[0,chanceCnt]
+            int select = (int) (Math.random() * chanceCnt); //[0,chanceCnt]
             return result[select];
         } else {
             return null;
@@ -202,12 +182,13 @@ public class Game {
 
     /**
      * check up from coordinates
-     * @param row - y
-     * @param column - x
+     *
+     * @param row       - y
+     * @param column    - x
      * @param gameField
      * @return
      */
-    boolean isUpClear(int row, int column, int[][] gameField) {
+    boolean isUpClear(int column, int row, int[][] gameField) {
         try {
             if (gameField[column][row - 1] == 0) {
                 if (
@@ -227,12 +208,13 @@ public class Game {
 
     /**
      * check right of coordinates
+     *
      * @param row
      * @param column
      * @param gameField
      * @return
      */
-    boolean isRightClear(int row, int column, int[][] gameField) {
+    boolean isRightClear(int column, int row, int[][] gameField) {
         try {
             if (gameField[column + 1][row] == 0) {
                 if (
@@ -252,12 +234,13 @@ public class Game {
 
     /**
      * Check down of coordinates
+     *
      * @param row
      * @param column
      * @param gameField
      * @return
      */
-    boolean isDownClear(int row, int column, int[][] gameField) {
+    boolean isDownClear(int column, int row, int[][] gameField) {
         try {
             if (gameField[column][row + 1] == 0) {
                 if (
@@ -277,12 +260,13 @@ public class Game {
 
     /**
      * Check left of coordinates
+     *
      * @param row
      * @param column
      * @param gameField
      * @return
      */
-    boolean isLeftClear(int row, int column, int[][] gameField) {
+    boolean isLeftClear(int column, int row, int[][] gameField) {
         try {
             if (gameField[column - 1][row] == 0) {
                 if (
@@ -292,7 +276,37 @@ public class Game {
                                 gameField[column - 2][row - 1] == 0 &&
                                 gameField[column - 1][row - 1] == 0
                 ) {
-                    result[chanceCnt++] = new int[]{curX - 1, curY};
+//                    result[chanceCnt++] = new int[]{curX - 1, curY};
+                    return true;
+                }
+            }
+        } catch (IndexOutOfBoundsException ex) {/*ignore*/}
+        return false;
+    }
+
+    boolean isItClear(int column, int row, int[][] gameField) {
+        try {
+            int leftDown = gameField[column - 1][row + 1];
+            int left = gameField[column - 1][row];
+            int leftUp = gameField[column - 1][row - 1];
+            int up = gameField[column][row - 1];
+            int rightUp = gameField[column + 1][row - 1];
+            int right = gameField[column + 1][row];
+            int rightDown = gameField[column + 1][row + 1];
+            int down = gameField[column][row + 1];
+
+            if (gameField[column][row] == 0) {
+                if (leftDown < 0&&
+                        left<0&&
+                        leftUp<0&&
+                        up<0&&
+                        rightUp<0&&
+                        right<0&&
+                        rightDown<0&&
+                        down<0
+                ) {
+//                    result[chanceCnt++] = new int[]{curX - 1, curY};
+                    return true;
                 }
             }
         } catch (IndexOutOfBoundsException ex) {/*ignore*/}

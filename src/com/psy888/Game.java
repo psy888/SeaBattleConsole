@@ -1,15 +1,12 @@
 package com.psy888;
 
 public class Game {
-    //Field UI
-    static final char CHAR_SHIP = 'o';
-    static final char CHAR_SEA = '.';
-    static final char CHAR_MISS = '-';
-    static final char CHAR_HIT = '+';
-    static final char CHAR_KILL = 'x';
+
 
     //Game field size 10x10
     static final int FIELD_SIZE = 10;
+
+    UIOut out;
 
     //Game field ARRAY
     int[][] userField = new int[FIELD_SIZE][FIELD_SIZE];
@@ -34,32 +31,16 @@ public class Game {
     //constructor
     public Game() {
         //todo fill game fields
-
+        out = new UIOut(userField,compField);
         fillGameField(userField);
         fillGameField(compField);
+        out.printField();
 
 
-    }
-
-    /**
-     * print game fields to console
-     */
-    public void printField() {
-//        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-//        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        System.out.println("\n");
-        for (int i = 0; i < FIELD_SIZE; i++) {
-            for (int j = 0; j < FIELD_SIZE; j++) {
-                System.out.print(" " + ((userField[i][j]==0)?""+CHAR_SEA:userField[i][j]) + " ");
-            }
-            System.out.print("\t\t");
-            for (int j = 0; j < FIELD_SIZE; j++) {
-                System.out.print(" " + ((compField[i][j]==0)?""+CHAR_SEA:compField[i][j]) + " ");
-            }
-            System.out.println();
-        }
 
     }
+
+
 
     /**
      * make Shot
@@ -131,7 +112,7 @@ public class Game {
 
             }
             System.out.println("Ship Length " + (shipLength - (shipLength - i)));
-            printField();
+            out.printField();
         }
 
     }

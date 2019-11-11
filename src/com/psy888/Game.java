@@ -1,6 +1,5 @@
 package com.psy888;
 
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Game {
@@ -10,7 +9,6 @@ public class Game {
     static final int FIELD_SIZE = 10;
     private static final int SHOT_MISS = 10;
 
-    int[][] shipCoordinates = new int[4][2];
 
     UIOut out;
 
@@ -87,6 +85,10 @@ public class Game {
                 e.printStackTrace();
             }
         } while (!isGameEnd());
+        out.msg("\t\t-=====================-");
+        out.msg("\t\t-======GAME OVER======-");
+        out.msg("\t\t-=====================-");
+        out.msg("\t\t-======"+ ((isUserTurn)?"USER ":"COMP ")+"WIN!======-");
     }
 
     /**
@@ -98,16 +100,10 @@ public class Game {
 
         if (curGameField[coordinates[0]][coordinates[1]] > 0 &&
                 curGameField[coordinates[0]][coordinates[1]] < 5) {
+
             curGameField[coordinates[0]][coordinates[1]] = -curGameField[coordinates[0]][coordinates[1]];
             killOrHit(coordinates[0], coordinates[1], curGameField);
-            /*
-            if(checkField(coordinates[0]-1,coordinates[1]-1,coordinates[0]+1,coordinates[1]+1,curGameField)) {
-                //hit
-                curGameField[coordinates[0]][coordinates[1]] = -curGameField[coordinates[0]][coordinates[1]] - 5;
-            }else{
-                //kill
-                curGameField[coordinates[0]][coordinates[1]] = -curGameField[coordinates[0]][coordinates[1]];
-            }*/
+
             return true;
         } else {
             curGameField[coordinates[0]][coordinates[1]] = SHOT_MISS;
@@ -126,8 +122,7 @@ public class Game {
      */
     void killOrHit(int row, int column, int[][] gameField) {
         int shipLength = Math.abs(gameField[row][column]);
-        System.out.println("SHIP LENGTH = " + shipLength);
-        //todo реализовать проверку
+
         int[][] shipCoordinates = new int[shipLength][2];
 
         //null all coordinates
@@ -136,23 +131,17 @@ public class Game {
         }
         //add first coordinates
         shipCoordinates[0] = new int[]{row, column};
-        //todo search coordinates
-//        do {
+        // search current ship coordinates
         searchShip(row, column, shipCoordinates, gameField);
 
-//            System.out.println(isShipFound(shipCoordinates));
-//        } while (!isShipFound(shipCoordinates));
 
-        //todo mark ship as kill or hint
         int hitCnt = 0;
         for (int i = 0; i < shipCoordinates.length; i++) {
-            System.out.println("Attacked ship" + i + " val " + gameField[shipCoordinates[i][0]][shipCoordinates[i][1]]);
             if (gameField[shipCoordinates[i][0]][shipCoordinates[i][1]] < 0) {
                 hitCnt++;
             }
         }
-        System.out.println("SHIP LENGTH = " + shipLength + " HITS = " + hitCnt);
-
+        // mark ship as kill or hint
         if (hitCnt == shipCoordinates.length) {
             for (int i = 0; i < shipCoordinates.length; i++) {
                 gameField[shipCoordinates[i][0]][shipCoordinates[i][1]] -= 5;
@@ -165,103 +154,64 @@ public class Game {
         if(isShipFound(shipCoordinates)) {return;}
         try {
             if (gameField[row - 1][col] != 0 && gameField[row - 1][col] != 10) {
-                //todo check is new coordinates
+                // check is new coordinates
                 if (isNewCoordinates(row - 1, col, shipCoordinates)) {
-                    //todo add to shipCoordinates
-//                    addShipCoordinates(row - 1, col, shipCoordinates);
-                    //todo lunch search with new coordinates
-//                    if (!isShipFound(shipCoordinates)) {
+                    //lunch search with new coordinates
                         searchShip(row - 1, col, shipCoordinates, gameField);
-//                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {/*ignore*/}
         try {
             if (gameField[row + 1][col] != 0 && gameField[row + 1][col] != 10) {
-                //todo check is new coordinates
+                //check is new coordinates
                 if (isNewCoordinates(row + 1, col, shipCoordinates)) {
-                    //todo add to shipCoordinates
-//                    addShipCoordinates(row + 1, col, shipCoordinates);
-                    //todo lunch search with new coordinates
-//                    if (!isShipFound(shipCoordinates)) {
+                    //lunch search with new coordinates
                         searchShip(row + 1, col, shipCoordinates, gameField);
-//                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {/*ignore*/}
         try {
             if (gameField[row][col - 1] != 0 && gameField[row][col - 1] != 10) {
-                //todo check is new coordinates
+                //check is new coordinates
                 if (isNewCoordinates(row, col - 1, shipCoordinates)) {
-                    //todo add to shipCoordinates
-//                    addShipCoordinates(row, col - 1, shipCoordinates);
-                    //todo lunch search with new coordinates
-//                    if(!isShipFound(shipCoordinates)) {
+                    //lunch search with new coordinates
                         searchShip(row, col - 1, shipCoordinates, gameField);
-//                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {/*ignore*/}
         try {
             if (gameField[row][col + 1] != 0 && gameField[row][col + 1] != 10) {
-                //todo check is new coordinates
+                // check is new coordinates
                 if (isNewCoordinates(row, col + 1, shipCoordinates)) {
-                    //todo add to shipCoordinates
-//                    addShipCoordinates(row, col + 1, shipCoordinates);
-                    //todo lunch search with new coordinates
-//                    if(!isShipFound(shipCoordinates)) {
+                    //lunch search with new coordinates
                         searchShip(row, col + 1, shipCoordinates, gameField);
-//                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {/*ignore*/}
-        /*if (!isShipFound(shipCoordinates)) {
-            for (int i = 0; i < shipCoordinates.length; i++) {
-                searchShip(shipCoordinates[i][0], shipCoordinates[i][1], shipCoordinates, gameField);
-//                if (isShipFound(shipCoordinates)) break;
-            }
-        }*/
 
     }
 
-    void addShipCoordinates(int row, int col, int[][] shipCoordinates) {
-        for (int i = 0; i < shipCoordinates.length; i++) {
-            if (shipCoordinates[i] == null) {
-                shipCoordinates[i] = new int[]{row, col};
-                return;
-            }
-        }
-    }
 
     boolean isNewCoordinates(int row, int col, int[][] shipCoordinates) {
         int found = 0;
         for (int i = 0; i < shipCoordinates.length; i++) {
             if (shipCoordinates[i] == null) { // если новые координаты
-//                continue; // пропуск цикла
                 shipCoordinates[i] = new int[]{row, col};
-                System.out.println("is new coordinates = TRUE---------+++++++" + "ROW= " + row + "COL= " + col);
-//                shipCoordinates[i][1] = col;
                 return true;
             } else if (shipCoordinates[i][0] == row &&
                     shipCoordinates[i][1] == col) { //если дубликат
                 found++;
-                System.out.println("is new coordinates = false found matches" + found );
                 return false;
             }
         }
-        System.out.println("is new coordinates = TRUE---------+++++++" + "ROW= " + row + "COL= " + col);
         return true;
     }
 
     boolean isShipFound(int[][] shipCoordinates) {
         boolean isFound = true;
-        int cnt = 0;
         for (int i = 0; i < shipCoordinates.length; i++) {
             if (shipCoordinates[i] == null) {
                 return !isFound;
-            } else {
-                cnt++;
-                System.out.println("coordinates length = " + shipCoordinates.length + " found cnt= " + cnt);
             }
         }
 
@@ -395,8 +345,6 @@ public class Game {
                 }
 
             }
-//            System.out.println("Ship Length " + (shipLength - (shipLength - i)));
-//            out.printField();
         }
 
     }
@@ -468,7 +416,6 @@ public class Game {
         //Choice direction
         if (chanceCnt > 0) {
             int select = (int) (Math.random() * chanceCnt); //[0,chanceCnt]
-//            System.out.println(Arrays.toString(result[select]));
             return result[select];
         } else {
             return null;

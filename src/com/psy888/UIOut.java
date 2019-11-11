@@ -4,7 +4,7 @@ public class UIOut {
     //Field UI
     static final char CHAR_SHIP = 'O';
     static final char CHAR_SEA = '.';
-    static final char CHAR_MISS = '-';
+    static final char CHAR_MISS = '*';
     static final char CHAR_HIT = '+';
     static final char CHAR_KILL = 'x';
 
